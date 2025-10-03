@@ -3,7 +3,7 @@ from flask_cors import CORS
 import logging
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500"]}})
 
 # Enable debug logging
 logging.basicConfig(level=logging.DEBUG)

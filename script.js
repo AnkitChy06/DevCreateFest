@@ -11,7 +11,7 @@ const fetchConfig = {
         'Content-Type': 'application/json'
     },
     mode: 'cors',
-    credentials: 'same-origin'
+    credentials: 'include'
 };
 
 // Show success message
