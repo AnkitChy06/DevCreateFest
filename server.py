@@ -63,6 +63,10 @@ challenges = [
 ]
 
 # API Endpoints
+@app.route('/')
+def index():
+    return "API Server is running!"
+
 @app.route('/api/users', methods=['GET', 'OPTIONS'])
 def get_users():
     logger.debug('GET /api/users called')

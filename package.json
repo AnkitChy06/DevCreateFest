@@ -1,0 +1,12 @@
+{
+  "name": "devcreatefest",
+  "version": "1.0.0",
+  "description": "Arvora - Play, Learn & Save the Planet",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./styles.css --watch",
+    "start": "python server.py"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.3.5"
+  }
+}
