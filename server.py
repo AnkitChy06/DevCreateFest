@@ -1,87 +1,26 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
+import logging
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
-# API Endpoints
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    return jsonify(users)
+# Enable debug logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-@app.route('/api/challenges', methods=['GET'])
-def get_challenges():
-    return jsonify(challenges)
+def build_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/api/user/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    user = next((user for user in users if user['id'] == user_id), None)
-    if user:
-        return jsonify(user)
-    return jsonify({'error': 'User not found'}), 404
-
-@app.route('/api/leaderboard', methods=['GET'])
-def get_leaderboard():
-    # Sort by points descending, take top 10
-    top_users = sorted(users, key=lambda u: u['points'], reverse=True)[:10]
-    return jsonify(top_users)
-
-@app.route('/api/approvals', methods=['GET'])
-def get_approvals():
-    # Return only pending approvals
-    pending_approvals = [app for app in approvals if app['status'] == 'Pending']
-    return jsonify(pending_approvals)
-
-@app.route('/api/user/<int:user_id>/complete-challenge', methods=['POST'])
-def complete_challenge(user_id):
-    user = next((user for user in users if user['id'] == user_id), None)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    data = request.json
-    challenge_id = data.get('challenge_id')
-    challenge = next((c for c in challenges if c['id'] == challenge_id), None)
-    
-    if not challenge:
-        return jsonify({'error': 'Challenge not found'}), 404
-        
-    user['points'] += challenge['points_reward']
-    user['challenges_completed'] += 1
-    
-    if user['challenges_completed'] % 5 == 0:  # Level up every 5 challenges
-        user['level'] += 1
-        
-    return jsonify({
-        'success': True,
-        'user': user,
-        'points_earned': challenge['points_reward']
-    })
-
-@app.route('/api/challenge/accept/<int:challenge_id>', methods=['POST'])
-def accept_challenge(challenge_id):
-    challenge = next((c for c in challenges if c['id'] == challenge_id), None)
-    if challenge:
-        return jsonify({
-            "message": "Challenge accepted!",
-            "challenge_title": challenge['title']
-        })
-    return jsonify({"error": "Challenge not found"}), 404
-
-@app.route('/api/approval/approve/<int:approval_id>', methods=['POST'])
-def approve_item(approval_id):
-    approval = next((a for a in approvals if a['id'] == approval_id), None)
-    if approval:
-        approval['status'] = 'Approved'
-        return jsonify({
-            "message": "Approval successful!",
-            "updated_status": approval['status']
-        })
-    return jsonify({"error": "Approval not found"}), 404
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+def build_actual_response(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 
 # Simulated data structures (in-memory "database")
-# User Data
 users = [
     {
         "id": 1,
@@ -101,66 +40,11 @@ users = [
         "id": 3,
         "name": "Alice Johnson",
         "level": 7,
-           "points": 1500,
+        "points": 1500,
         "challenges_completed": 15
-    },
-    {
-        "id": 4,
-        "name": "Bob Wilson",
-        "level": 2,
-        "points": 500,
-        "challenges_completed": 5
-    },
-    {
-        "id": 5,
-        "name": "Carol Davis",
-        "level": 4,
-        "points": 900,
-        "challenges_completed": 9
-    },
-    {
-        "id": 6,
-        "name": "David Brown",
-        "level": 6,
-        "points": 1200,
-        "challenges_completed": 12
-    },
-    { "id": 7,
-        "name": "Eve Garcia",
-        "level": 1,
-        "points": 200,
-        "challenges_completed": 2
-    },
-    {
-        "id": 8,
-        "name": "Frank Miller",
-        "level": 8,
-        "points": 1800,
-        "challenges_completed": 18
-    },
-    {
-        "id": 9,
-        "name": "Grace Lee",
-        "level": 3,
-        "points": 600,
-        "challenges_completed": 6
-    },
-    {
-        "id": 10,
-        "name": "Henry Taylor",
-        "level": 5,
-        "points": 1100,
-        "challenges_completed": 11
-    },
-      {
-        "id": 11,
-        "name": "Ivy Anderson",
-        "level": 4,
-        "points": 800,
-        "challenges_completed": 8
     }
 ]
-# Challenge Data
+
 challenges = [
     {
         "id": 1,
@@ -175,104 +59,71 @@ challenges = [
         "description": "Read one chapter from a non-fiction book",
         "points_reward": 50,
         "category": "Learning"
-    },
-    {"id": 3,
-        "title": "Volunteer Time",
-        "description": "Spend 30 minutes helping in the community",
-        "points_reward": 75,
-        "category": "Community"
-    },
-    {
-        "id": 4,
-        "title": "Exercise Routine",
-        "description": "Complete a 20-minute workout",
-        "points_reward": 40,
-        "category": "Health"
-    },
-    {
-        "id": 5,
-        "title": "Learn a New Skill",
-        "description": "Watch and practice a 15-minute tutorial",
-        "points_reward": 60,
-        "category": "Learning"
     }
 ]
-# Approval Data (Pending items)
-approvals = [
- {
-        "id": 1,
-        "user_name": "John Doe",
-        "submission_details": "Submitted proof for Daily Meditation challenge",
-        "status": "Pending"
-    },
-    {
-        "id": 2,
-        "user_name": "Jane Smith",
-        "submission_details": "Submitted proof for Read a Book Chapter challenge",
-        "status": "Pending"
-    },
-    {
-        "id": 3,
-        "user_name": "Alice Johnson",
-        "submission_details": "Submitted proof for Volunteer Time challenge",
-        "status": "Pending"
-    }
-]
+
 # API Endpoints
-@app.route('/api/profile', methods=['GET'])
-def get_profile():
-    # Simulate current user as the first in the list
-    current_user = users[0]
-    return jsonify(current_user)
-@app.route('/api/challenges', methods=['GET'])
+@app.route('/api/users', methods=['GET', 'OPTIONS'])
+def get_users():
+    logger.debug('GET /api/users called')
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    return build_actual_response(jsonify(users))
+
+@app.route('/api/challenges', methods=['GET', 'OPTIONS'])
 def get_challenges():
-    return jsonify(challenges)
-@app.route('/api/leaderboard', methods=['GET'])
+    logger.debug('GET /api/challenges called')
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    return build_actual_response(jsonify(challenges))
+
+@app.route('/api/user/<int:user_id>', methods=['GET', 'OPTIONS'])
+def get_user(user_id):
+    logger.debug(f'GET /api/user/{user_id} called')
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    user = next((user for user in users if user['id'] == user_id), None)
+    if user:
+        return build_actual_response(jsonify(user))
+    return build_actual_response(jsonify({'error': 'User not found'})), 404
+
+@app.route('/api/leaderboard', methods=['GET', 'OPTIONS'])
 def get_leaderboard():
-    # Sort by points descending, take top 10
+    logger.debug('GET /api/leaderboard called')
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
     top_users = sorted(users, key=lambda u: u['points'], reverse=True)[:10]
-    return jsonify(top_users)
-@app.route('/api/approvals', methods=['GET'])
-def get_approvals():
-    # Return only pending approvals
-    pending_approvals = [app for app in approvals if app['status'] == 'Pending']
-    return jsonify(pending_approvals)
-@app.route('/api/challenge/complete/<int:challenge_id>', methods=['POST'])
-def complete_challenge(challenge_id):
+    return build_actual_response(jsonify(top_users))
+
+@app.route('/api/user/<int:user_id>/complete-challenge', methods=['POST', 'OPTIONS'])
+def complete_challenge(user_id):
+    logger.debug(f'POST /api/user/{user_id}/complete-challenge called')
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+        
+    user = next((user for user in users if user['id'] == user_id), None)
+    if not user:
+        return build_actual_response(jsonify({'error': 'User not found'})), 404
+    
+    data = request.json
+    challenge_id = data.get('challenge_id')
     challenge = next((c for c in challenges if c['id'] == challenge_id), None)
-    if challenge:
-        # Update current user (first in list)
-        current_user = users[0]
-        current_user['points'] += challenge['points_reward']
-        current_user['challenges_completed'] += 1
-        return jsonify({
-            "message": "Challenge completed successfully!",
-            "points_earned": challenge['points_reward'],
-            "new_points": current_user['points'],
-            "new_completed": current_user['challenges_completed']
-        })
-    else:
-        return jsonify({"error": "Challenge not found"}), 404
-@app.route('/api/challenge/accept/<int:challenge_id>', methods=['POST'])
-def accept_challenge(challenge_id):
-    challenge = next((c for c in challenges if c['id'] == challenge_id), None)
-    if challenge:
-        # Simulate acceptance (no major data change, just confirmation)
-        return jsonify({
-            "message": "Challenge accepted!",
-            "challenge_title": challenge['title']
-        })
-    else:
-           return jsonify({"error": "Challenge not found"}), 404
-@app.route('/api/approval/approve/<int:approval_id>', methods=['POST'])
-def approve_item(approval_id):
-    for approval in approvals:
-        if approval['id'] == approval_id:
-            approval['status'] = 'Approved'
-            return jsonify({
-                "message": "Approval successful!",
-                "updated_status": approval['status']
-            })
-    return jsonify({"error": "Approval not found"}), 404
+    
+    if not challenge:
+        return build_actual_response(jsonify({'error': 'Challenge not found'})), 404
+        
+    user['points'] += challenge['points_reward']
+    user['challenges_completed'] += 1
+    
+    if user['challenges_completed'] % 5 == 0:  # Level up every 5 challenges
+        user['level'] += 1
+        
+    return build_actual_response(jsonify({
+        'success': True,
+        'user': user,
+        'points_earned': challenge['points_reward']
+    }))
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    logger.info('Starting Flask server on port 5000...')
+    app.run(debug=True, port=5000)
