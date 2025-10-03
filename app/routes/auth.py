@@ -1,29 +1,62 @@
 from flask import Blueprint, request, jsonify
 from ..services.auth_service import AuthService
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from ..utils.error_handlers import APIError
+from ..utils.logger import setup_logger
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
+from ..models.user import User
 
 auth_bp = Blueprint('auth', __name__)
+logger = setup_logger(__name__)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    
-    # Validate required fields
-    required_fields = ['name', 'email', 'password']
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Missing required fields'}), 400
-    
-    return AuthService.register(data)
+    """Register a new user with optional referral"""
+    try:
+        data = request.get_json()
+        required_fields = ['name', 'email', 'password']
+        
+        # Validate required fields
+        for field in required_fields:
+            if field not in data:
+                raise APIError(f'Missing required field: {field}', status_code=400)
+        
+        # Register user
+        result = AuthService.register_user(data)
+        logger.info(f"New user registered: {data['email']}")
+        
+        return jsonify(result), 201
+        
+    except APIError as e:
+        logger.warning(f"Registration failed: {str(e)}")
+        raise e
+    except Exception as e:
+        logger.error(f"Unexpected error during registration: {str(e)}")
+        raise APIError('Internal server error', status_code=500) from e
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    
-    # Validate required fields
-    if not data.get('email') or not data.get('password'):
-        return jsonify({'error': 'Email and password are required'}), 400
-    
-    return AuthService.login(data['email'], data['password'])
+    """Authenticate user and return token"""
+    try:
+        data = request.get_json()
+        required_fields = ['email', 'password']
+        
+        # Validate required fields
+        for field in required_fields:
+            if field not in data:
+                raise APIError(f'Missing required field: {field}', status_code=400)
+        
+        # Authenticate user
+        result = AuthService.login_user(data)
+        logger.info(f"User logged in: {data['email']}")
+        
+        return jsonify(result)
+        
+    except APIError as e:
+        logger.warning(f"Login failed: {str(e)}")
+        raise e
+    except Exception as e:
+        logger.error(f"Unexpected error during login: {str(e)}")
+        raise APIError('Internal server error', status_code=500) from e
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()

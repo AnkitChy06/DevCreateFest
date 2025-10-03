@@ -1,15 +1,25 @@
+import Auth from './src/js/auth.js';
+
 // Backend API URL
 const API_URL = 'http://127.0.0.1:5050/api';
 
-// Current user ID (for demo purposes)
-const CURRENT_USER_ID = 1;
+// Initialize authentication
+Auth.init();
 
 // Fetch configuration for API calls
-const fetchConfig = {
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+const getFetchConfig = () => {
+    const config = {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    };
+    
+    if (Auth.token) {
+        config.headers['Authorization'] = `Bearer ${Auth.token}`;
     }
+    
+    return config;
 };
 
 // Show success message
