@@ -7,11 +7,9 @@ const CURRENT_USER_ID = 1;
 // Fetch configuration for API calls
 const fetchConfig = {
     headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
     },
-    mode: 'cors',
-    credentials: 'include'
+    mode: 'cors'
 };
 
 // Show success message
