@@ -2,12 +2,12 @@ from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 import logging
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='', static_folder='public')
 CORS(app, 
      resources={r"/api/*": {
-         "origins": ["http://127.0.0.1:5501", "http://localhost:5501"],
-         "methods": ["GET", "POST", "OPTIONS"],
-         "allow_headers": ["Content-Type"],
+         "origins": ["http://127.0.0.1:5050", "http://localhost:5050"],
+         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Authorization"],
          "supports_credentials": True
      }})
 
@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 def build_preflight_response():
     response = make_response()
     origin = request.headers.get('Origin')
-    if origin in ['http://127.0.0.1:5501', 'http://localhost:5501']:
+    if origin in ['http://127.0.0.1:5050', 'http://localhost:5050']:
         response.headers.add('Access-Control-Allow-Origin', origin)
         response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
     return response
 
 def build_actual_response(response):
