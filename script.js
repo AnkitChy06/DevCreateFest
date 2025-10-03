@@ -1,5 +1,5 @@
 // Backend API URL
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://127.0.0.1:5050/api';
 
 // Current user ID (for demo purposes)
 const CURRENT_USER_ID = 1;
@@ -7,9 +7,9 @@ const CURRENT_USER_ID = 1;
 // Fetch configuration for API calls
 const fetchConfig = {
     headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
-    },
-    mode: 'cors'
+    }
 };
 
 // Show success message
