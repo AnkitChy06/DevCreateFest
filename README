@@ -1,0 +1,111 @@
+# Arvora - Play, Learn & Save the Planet 🌍
+
+## Team Information
+- **Team Name**: DATA DIVERS
+- **Team ID**: T-011
+- **Members**:
+  - Saloni - Backend developer & Team lead
+  - Anush Sharma - Backend Developer
+  - Ankit Choudhary - Backend developer & debugging
+  - Khem Bishkarma - Frontend & PPT
+  - Himani Dey - Frontend & PPT
+  
+
+## Problem Statement
+We are addressing the challenge of environmental education and sustainable living awareness through gamification. Our platform makes learning about and contributing to environmental conservation engaging and rewarding.
+
+## Tech Stack
+### Frontend
+- HTML5/CSS3
+- JavaScript
+- Tailwind CSS
+- Live Server
+
+### Backend
+- Python 3.9+
+- Flask Framework
+- SQLAlchemy ORM
+- JWT Authentication
+
+### Database
+- SQLite (Development)
+- PostgreSQL (Production)
+
+## Setup Instructions
+
+1. **Clone the Repository**
+```bash
+git clone https://github.com/AnkitChy06/DevCreateFest.git
+cd DevCreateFest
+```
+
+2. **Set Up Virtual Environment**
+```bash
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+3. **Install Dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+4. **Environment Configuration**
+Create a `.env` file in the root directory:
+```plaintext
+FLASK_APP=run.py
+FLASK_ENV=development
+SECRET_KEY=your-secret-key
+DATABASE_URL=your-database-url
+```
+
+5. **Initialize Database**
+```bash
+python run.py
+```
+
+6. **Run the Application**
+```bash
+# Terminal 1 - Backend Server
+python run.py
+
+# Terminal 2 - Frontend (using VS Code Live Server)
+# Right-click on index.html and select "Open with Live Server"
+```
+
+The application will be available at:
+- Frontend: http://127.0.0.1:5501
+- Backend API: http://127.0.0.1:5050
+
+## Features
+- User Authentication (Register/Login)
+- Environmental Challenges
+- Point System & Rewards
+- Leaderboard
+- Progress Tracking
+- Educational Content
+
+## API Documentation
+- Authentication endpoints: `/api/login`, `/api/register`
+- User profile: `/api/user/profile`
+- Challenges: `/api/challenges`
+- Leaderboard: `/api/leaderboard`
+
+## Limitations & Notes
+- Currently supports web browsers only
+- Requires internet connection for API calls
+- Session timeout after 1 hour
+- Maximum file upload size: 5MB
+
+## Future Enhancements
+- Mobile application
+- Social sharing features
+- Real-time notifications
+- Integration with IoT devices
+- Community challenges
+
+## Contributing
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
